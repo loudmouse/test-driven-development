@@ -1,0 +1,134 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Docs:
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
+
+// Specs:
+  // https://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.find
+
+// Description:
+  // Returns the found value in the array,
+  // if an element in the array satisfies the provided testing function or undefined if not found.
+
+
+// The Steps
+  // 1 write requirements based on docs
+  // 2 write description for test
+  // 3 write test to fail
+  // 4 write code to make the test pass
+  // 5 rinse and repeat
+
+// Function Signature:
+  // find(array, callback[, opitonalThis])
+
+
+// Callback Parameters:
+  // currentValue
+  // currentIndex
+  // array
+
+
+// Return Value:
+  // The value of the first element in the array that satisfies the provided testing function;
+  // otherwise, undefined is returned.
+
+
+// Requirements:
+  // It should run the callback function array.length number of times.
+  // It should pass currentValue as the first argument to the callback.
+  // It should pass currentIndex as the second argument to the callback.
+  // It should pass the array as the third argument to the callback.
+  // It should accept an optionalThis.
+  // It should not skip holes.
+  // If the currentValue passed to the callback returns true, then the function should return that element.
+  // If none of the elements passed as currentValue evaluate to true, then the function should return undefined.
+  // It should not mutate the original array.
+
+
+// This is where the function will go.
+function find(array, callback, optionalThis) {
+  var findCallback = callback;
+
+  if (optionalThis) {
+    findCallback = callback.bind(optionalThis);
+  }
+
+  for(var i = 0; i < array.length; i++){
+    if (findCallback(array[i], i, array)) {
+      return array[i];
+    }
+  }
+  return undefined;
+}
+
+
+// This is where the tests will go.
+tests({
+
+  '1. It should run the callback array.length number of times.': function() {
+    var numberOfTimesCallbackHasRun = 0;
+    var array = [1,2];
+    var length = array.length;
+    find(array, function() {
+      numberOfTimesCallbackHasRun++;
+    });
+    eq(numberOfTimesCallbackHasRun, length)
+  },
+  '2. It should pass currentValue as the first argument to the callback.': function() {
+    find([1], function(currentValue){
+      eq(currentValue, 1);
+    })
+  },
+  '3. It should pass currentIndex as the second argument to the callback.': function() {
+    find([1], function(currentValue, currentIndex){
+      eq(currentIndex, 0);
+    })
+  },
+  '4. It should pass the array as the third argument to the callback.': function() {
+    var testArray = [1,2,3];
+    find(testArray, function(currentValue, currentIndex, originalArray){
+      eq(originalArray, testArray);
+    })
+  },
+  '5. It should accept an optionalThis.': function() {
+    find([1], function(){
+      eq(this.thisArg, 'Object to use as this when executing callback.');
+    },{thisArg: 'Object to use as this when executing callback.'})
+  },
+  '6. It should not skip holes.': function() {
+    var numberOfTimesCallbackHasRun = 0;
+    var array = [1,,2];
+    find(array, function(currentValue){
+      numberOfTimesCallbackHasRun++;
+    });
+    eq(numberOfTimesCallbackHasRun, array.length);
+  },
+  '7. If the currentValue passed to the callback returns true, then the function should return that element.': function() {
+    var numberOfTimesCallbackHasRun = 0;
+    var returnValueOfFind = find([1,2,3,4,5], function(currentValue){
+      numberOfTimesCallbackHasRun++
+      return currentValue === 3;
+    })
+    eq(returnValueOfFind, 3);
+    eq(numberOfTimesCallbackHasRun, 3);
+  },
+  '8. If none of the elements passed as currentValue evaluate to true, then the function should return undefined.': function() {
+    var returnValueOfFind = find([1], function(currentValue){
+      return currentValue === 4;
+    })
+    eq(returnValueOfFind, undefined);
+  },
+  '9. It should not mutate the original array.': function() {
+    var originalArray = [1,2,3];
+    find(originalArray, function(currentValue){
+      return currentValue === 3;
+    })
+    eq(originalArray.length, 3);
+    eq(originalArray[0], 1);
+    eq(originalArray[1], 2);
+    eq(originalArray[2], 3);
+  }
+});
+
+</script>
